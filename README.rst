@@ -1,0 +1,1 @@
+Haystack support for Django FIAS (https://github.com/Yuego/django-fias)
