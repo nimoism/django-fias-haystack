@@ -31,7 +31,7 @@ setup(
         'elasticsearch': ['elasticstack', ],
     },
     classifiers=[
-        'Development Status :: 1 - Planning',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Environment :: Web Environment',
         'Programming Language :: Python :: 2',

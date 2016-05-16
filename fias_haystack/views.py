@@ -15,7 +15,9 @@ class SuggestByHaystack(Select2View):
         sqs = SearchQuerySet().using(settings.FIAS_HAYSTACK_CONNECTION_ALIAS).models(AddrObj)
         cleaned_words = [sqs.query.clean(word.strip()) for word in term.split(' ')]
         query_bits = [SQ(text_auto=word) for word in cleaned_words if word]
-        items = sqs.filter(six.moves.reduce(operator.__or__, query_bits))
+        if query_bits:
+            sqs = sqs.filter(six.moves.reduce(operator.__or__, query_bits))
+        items = sqs
         items = items[:50]
         if not len(items):
             return EMPTY_RESULT
