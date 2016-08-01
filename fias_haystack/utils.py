@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
 import inspect
-import types
 
 import six
 from django.conf import settings
 from django.utils import importlib
+from django.utils.encoding import force_text
 from django.utils.module_loading import module_has_submodule
 
 
@@ -26,8 +26,7 @@ class ExcludedIndexes(object):
             included_indexes = []
         self.included_indexes = []
         for included_index in included_indexes:
-            if not isinstance(included_index, types.UnicodeType):
-                included_index = six.u(included_index)
+            included_index = force_text(included_index)
             self.included_indexes.append(included_index)
         self._excluded = None
         super(ExcludedIndexes, self).__init__()
