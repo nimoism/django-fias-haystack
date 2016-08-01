@@ -2,8 +2,10 @@ from __future__ import absolute_import, unicode_literals
 
 from django.conf.urls import url
 
-from fias_haystack.views import SuggestByHaystack
+from fias_haystack.views import HaystackResponseView
+
 
 urlpatterns = [
-    url(r'^suggest_haystack', SuggestByHaystack.as_view(), name='suggest_by_haystack'),
+    url(r'^suggest\.json$', HaystackResponseView.as_view(), name='suggest'),
+    # url(r'^suggest-area.json$', HaystackGetAreasView.as_view(), name='suggest-area'),
 ]

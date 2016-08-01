@@ -5,7 +5,7 @@ import types
 
 import six
 from django.conf import settings
-from django.utils import importlib
+import importlib
 from django.utils.module_loading import module_has_submodule
 
 
