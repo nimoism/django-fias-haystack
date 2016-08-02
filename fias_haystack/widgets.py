@@ -1,14 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 
-from fias.widgets import AddressSelect2 as BaseAddressSelect2
+from django_select2.forms import HeavySelect2Widget
+from fias.config import SUGGEST_VIEW
 
 
-class AddressSelect2(BaseAddressSelect2):
-
+class AddressSelect2Widget(HeavySelect2Widget):
     options = {}
+    data_view = SUGGEST_VIEW
 
     def init_options(self):
-        super(AddressSelect2, self).init_options()
+        super(AddressSelect2Widget, self).init_options()
         self.options.update({
             'autocomplete': 'off',
             'minimumInputLength': 1,
