@@ -1,12 +1,41 @@
 from __future__ import unicode_literals
 
 import inspect
+
+import re
 import types
 
 import six
 from django.conf import settings
 import importlib
 from django.utils.module_loading import module_has_submodule
+
+
+IDENTIFIER_REGEX = re.compile('^[\w\d_]+\.[\w\d_]+\.(\d+|[a-f0-9\-]{36})$')
+
+
+def get_identifier(obj_or_string):
+    """
+    Get an unique identifier for the object or a string representing the
+    object.
+
+    If not overridden, uses <app_label>.<object_name>.<pk>.
+    """
+    if isinstance(obj_or_string, six.string_types):
+        if not IDENTIFIER_REGEX.match(obj_or_string):
+            raise AttributeError(u"Provided string '%s' is not a valid identifier." % obj_or_string)
+
+        return obj_or_string
+
+    return u"%s.%s" % (get_model_ct(obj_or_string), obj_or_string._get_pk_val())
+
+
+def get_model_ct_tuple(model):
+    return (model._meta.app_label, model._meta.model_name)
+
+
+def get_model_ct(model):
+    return "%s.%s" % get_model_ct_tuple(model)
 
 
 def get_haystack_engine():
