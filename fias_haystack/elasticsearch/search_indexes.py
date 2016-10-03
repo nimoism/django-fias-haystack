@@ -7,7 +7,7 @@ from fias.models.addrobj import AddrObj
 from fias.models.house import House
 from haystack.indexes import CharField as BaseCharField, IntegerField as BaseIntegerField
 
-from fias_haystack.search_indexes import BaseFiasHaystackSearchIndex
+from fias_haystack.search_indexes_base import BaseFiasHaystackSearchIndex
 
 
 class ElasticsearchSearchIndex(BaseFiasHaystackSearchIndex):
