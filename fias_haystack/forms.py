@@ -10,5 +10,7 @@ class AddressSelect2Field(ChoiceField):
     widget = widgets.AddressSelect2Widget(data_view=SUGGEST_VIEW)
 
     def __init__(self, *args, **kwargs):
-        self.address_formatter = kwargs.pop('address_formatter', get_address_formatter())
+        self.address_formatter = kwargs.pop('address_formatter', None)
+        if not self.address_formatter:
+            self.address_formatter = get_address_formatter()
         super(AddressSelect2Field, self).__init__(*args, **kwargs)
