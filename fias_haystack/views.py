@@ -3,9 +3,12 @@
 from __future__ import absolute_import, unicode_literals
 
 import operator
-from string import strip
-
 import six
+if six.PY2:
+    strip = unicode.strip
+elif six.PY3:
+    strip = str.strip
+
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.http.response import JsonResponse
