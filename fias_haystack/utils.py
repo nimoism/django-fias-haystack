@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import inspect
 
 import re
-import types
 
 import six
 from django.conf import settings
@@ -55,9 +54,7 @@ class ExcludedIndexes(object):
             included_indexes = []
         self.included_indexes = []
         for included_index in included_indexes:
-            if not isinstance(included_index, types.UnicodeType):
-                included_index = six.u(included_index)
-            self.included_indexes.append(included_index)
+            self.included_indexes.append(six.u(included_index))
         self._excluded = None
         super(ExcludedIndexes, self).__init__()
 
