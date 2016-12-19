@@ -54,7 +54,11 @@ class ExcludedIndexes(object):
             included_indexes = []
         self.included_indexes = []
         for included_index in included_indexes:
-            self.included_indexes.append(six.u(included_index))
+            if six.PY2:
+                import types
+                if not isinstance(included_index, types.UnicodeType):
+                    included_index = six.u(included_index)
+            self.included_indexes.append(included_index)
         self._excluded = None
         super(ExcludedIndexes, self).__init__()
 
