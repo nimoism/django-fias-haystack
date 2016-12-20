@@ -1,10 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 
-import string
+import six
 
 from django import db
 from django.conf import settings
 from fias.models.socrbase import SocrBase
+
+if six.PY2:
+    from string import strip
+else:
+    strip = str.strip
 
 
 def get_index_db_loader():
@@ -155,9 +160,9 @@ class IndexPostgresqlLoader(IndexDbLoader):
         aolevels_parts = map(int, addr_obj.aolevels.split(self.part_delimiter))
         short_types_parts = map(lambda x: x.strip().lower(), addr_obj.short_types.split(self.part_delimiter))
         full_types_parts = map(lambda x: x.strip().lower(), addr_obj.full_types.split(self.part_delimiter))
-        formal_names_parts = map(string.strip, addr_obj.formal_names.split(self.part_delimiter))
+        formal_names_parts = map(strip, addr_obj.formal_names.split(self.part_delimiter))
         if addr_obj.official_names:
-            official_names_parts = map(string.strip, addr_obj.official_names.split(self.part_delimiter))
+            official_names_parts = map(strip, addr_obj.official_names.split(self.part_delimiter))
         else:
             official_names_parts = list(formal_names_parts)
         path_parts = [aolevels_parts, short_types_parts, full_types_parts, formal_names_parts, official_names_parts]
