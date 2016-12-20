@@ -5,11 +5,14 @@ import six
 from django import db
 from django.conf import settings
 from fias.models.socrbase import SocrBase
+from logging import getLogger
 
 if six.PY2:
     from string import strip
 else:
     strip = str.strip
+
+logger = getLogger(__name__)
 
 
 def get_index_db_loader():
@@ -166,9 +169,12 @@ class IndexPostgresqlLoader(IndexDbLoader):
         else:
             official_names_parts = list(formal_names_parts)
         path_parts = [aolevels_parts, short_types_parts, full_types_parts, formal_names_parts, official_names_parts]
-        parts_lengths = [len(p) for p in path_parts]
+
+        parts_lengths = [len(list(p)) for p in path_parts]
         if min(parts_lengths) != max(parts_lengths):
-            raise RuntimeError("Address object parts has different lengths")
+            logger.error("Address object parts has different lengths", extra={
+                'addrobj': addr_obj
+            })
         path_list = zip(*path_parts)
         path_part_keys = ['aolevel', 'short_type', 'full_type', 'formal_name', 'official_name']
         path_dict_list = [dict(zip(path_part_keys, path_part)) for path_part in path_list]
