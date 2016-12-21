@@ -38,7 +38,6 @@ class HaystackResponseView(BaseListView):
                 sqs = sqs.filter(six.moves.reduce(operator.__or__, query_bits))
             items = sqs
             items = items[:50]
-            print(items[0].aoguid, items[0].full_name)
         else:
             items = []
         return JsonResponse({
