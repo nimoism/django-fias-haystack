@@ -4,10 +4,6 @@ from __future__ import absolute_import, unicode_literals
 
 import operator
 import six
-if six.PY2:
-    strip = unicode.strip
-elif six.PY3:
-    strip = str.strip
 
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
@@ -17,6 +13,11 @@ from fias.models.addrobj import AddrObj
 from haystack.backends import SQ
 from haystack.query import SearchQuerySet
 
+if six.PY2:
+    strip = unicode.strip
+elif six.PY3:
+    strip = str.strip
+
 
 class HaystackResponseView(BaseListView):
     def get(self, request, *args, **kwargs):
@@ -24,11 +25,11 @@ class HaystackResponseView(BaseListView):
         if len(term) > 0:
             sqs = SearchQuerySet().using(settings.FIAS_HAYSTACK_CONNECTION_ALIAS).models(AddrObj)
             aolevels = request.GET.get('aolevels', '')
-            aolevels = map(int, filter(lambda s: s not in EMPTY_VALUES, map(strip, aolevels.split(','))))
+            aolevels = list(map(int, filter(lambda s: s not in EMPTY_VALUES, map(strip, aolevels.split(',')))))
             if aolevels:
                 sqs = sqs.filter(aolevel__in=aolevels)
             socrs = request.GET.get('socrs', '')
-            socrs = map(strip, socrs.split(','))
+            socrs = list(filter(lambda s: s not in EMPTY_VALUES, map(strip, socrs.split(','))))
             if socrs:
                 sqs = sqs.filter(shortname__in=socrs)
             cleaned_words = [sqs.query.clean(word.strip()) for word in term.split(' ')]
@@ -37,6 +38,7 @@ class HaystackResponseView(BaseListView):
                 sqs = sqs.filter(six.moves.reduce(operator.__or__, query_bits))
             items = sqs
             items = items[:50]
+            print(items[0].aoguid, items[0].full_name)
         else:
             items = []
         return JsonResponse({

@@ -160,17 +160,17 @@ class IndexPostgresqlLoader(IndexDbLoader):
         return queryset
 
     def get_address_path(self, addr_obj):
-        aolevels_parts = map(int, addr_obj.aolevels.split(self.part_delimiter))
-        short_types_parts = map(lambda x: x.strip().lower(), addr_obj.short_types.split(self.part_delimiter))
-        full_types_parts = map(lambda x: x.strip().lower(), addr_obj.full_types.split(self.part_delimiter))
-        formal_names_parts = map(strip, addr_obj.formal_names.split(self.part_delimiter))
+        aolevels_parts = list(map(int, addr_obj.aolevels.split(self.part_delimiter)))
+        short_types_parts = list(map(lambda x: x.strip().lower(), addr_obj.short_types.split(self.part_delimiter)))
+        full_types_parts = list(map(lambda x: x.strip().lower(), addr_obj.full_types.split(self.part_delimiter)))
+        formal_names_parts = list(map(strip, addr_obj.formal_names.split(self.part_delimiter)))
         if addr_obj.official_names:
-            official_names_parts = map(strip, addr_obj.official_names.split(self.part_delimiter))
+            official_names_parts = list(map(strip, addr_obj.official_names.split(self.part_delimiter)))
         else:
             official_names_parts = list(formal_names_parts)
         path_parts = [aolevels_parts, short_types_parts, full_types_parts, formal_names_parts, official_names_parts]
 
-        parts_lengths = [len(list(p)) for p in path_parts]
+        parts_lengths = [len(p) for p in path_parts]
         if min(parts_lengths) != max(parts_lengths):
             logger.error("Address object parts has different lengths", extra={
                 'addrobj': addr_obj
