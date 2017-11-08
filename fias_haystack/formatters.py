@@ -2,15 +2,12 @@
 from __future__ import absolute_import, unicode_literals
 
 import functools
+import re
 
 from django.conf import settings
 from django.utils.module_loading import import_string
 from fias.models.addrobj import AddrObj
 from fias.models.socrbase import SocrBase
-
-
-def get_address_formatter(*args, **kwargs):
-    return import_string(settings.FIAS_HAYSTACK_ADDRESS_FORMATTER)(*args, **kwargs)
 
 
 class BaseAddressFormatter(object):
@@ -70,23 +67,23 @@ class AddressFormatter(BaseAddressFormatter):
             'область',
             'станица',
         )
-        if addr_obj_info['full_type'] in reversed_types:
+        if self._get_type_name(addr_obj_info) in reversed_types:
             return True
 
     def is_reversed_type_republic(self, addr_obj_info):
-        if addr_obj_info['full_type'] not in ('республика', ):
+        if self._get_type_name(addr_obj_info) not in ('республика', ):
             return None
         official_name = addr_obj_info['official_name']
         return official_name[-2:] == 'ая'
 
     def is_reversed_type_area(self, addr_obj_info):
-        if addr_obj_info['full_type'] not in ('район', ):
+        if self._get_type_name(addr_obj_info) not in ('район', ):
             return None
         official_name = addr_obj_info['official_name']
         return official_name[-2:] in ('ий', 'ый')
 
     def is_reversed_type_highway(self, addr_obj_info):
-        if addr_obj_info['full_type'] not in ('шоссе', ):
+        if self._get_type_name(addr_obj_info) not in ('шоссе', ):
             return None
         official_name = addr_obj_info['official_name']
         return official_name[-2:] in ('ое', )
@@ -107,24 +104,37 @@ class AddressFormatter(BaseAddressFormatter):
                 return is_reversed
         return False
 
-    def _get_address_part_format(self, addr_obj_info):
-        if self.is_full_name_reversed(addr_obj_info):
-            address_format = '{name} {type}'
+    not_dottable_symbols = ['.', '-']
+    re_not_dottable_symbols = re.compile(r'[{symbols}]'.format(symbols=''.join([re.escape(s) for s in not_dottable_symbols])))
+
+    def is_dottable_short_type(self, short_type):
+        if not short_type:
+            return False
+        return self.re_not_dottable_symbols.search(short_type) is None
+
+    def _get_address_part_format(self, addr_obj_info, dotted_type=False):
+        short_type = self._get_type_short_name(addr_obj_info)
+        if dotted_type and self.is_dottable_short_type(short_type):
+            dot = '.'
         else:
-            address_format = '{type} {name}'
+            dot = ''
+        if self.is_full_name_reversed(addr_obj_info):
+            address_format = '{{name}} {{type}}{dot}'.format(dot=dot)
+        else:
+            address_format = '{{type}}{dot} {{name}}'.format(dot=dot)
         return address_format
 
     def _format_full_address_part(self, addr_obj_info):
         type_ = addr_obj_info['full_type']
         name = addr_obj_info['official_name']
-        address_format = self._get_address_part_format(addr_obj_info)
+        address_format = self._get_address_part_format(addr_obj_info, dotted_type=False)
         formatted = address_format.format(type=type_, name=name)
         return formatted
 
     def _format_short_address_part(self, addr_obj_info):
-        type_ = addr_obj_info['short_type']
-        name = addr_obj_info['official_name']
-        address_format = self._get_address_part_format(addr_obj_info)
+        type_ = self._get_type_short_name(addr_obj_info)
+        name = addr_obj_info.get('official_name')
+        address_format = self._get_address_part_format(addr_obj_info, dotted_type=True)
         formatted = address_format.format(type=type_, name=name)
         return formatted
 
@@ -144,3 +154,16 @@ class AddressFormatter(BaseAddressFormatter):
             'official_name': addr_obj.offname,
             'item_weight': type_.item_weight,
         }
+
+    def _get_type_name(self, addr_obj_info):
+        type_name = addr_obj_info.get('type_name', addr_obj_info.get('full_type'))
+        if type_name:
+            type_name = type_name.lower()
+        return type_name
+
+    def _get_type_short_name(self, addr_obj_info):
+        return addr_obj_info.get('type_short_name', addr_obj_info.get('short_type'))
+
+
+def get_address_formatter(*args, **kwargs) -> BaseAddressFormatter:
+    return import_string(settings.FIAS_HAYSTACK_ADDRESS_FORMATTER)(*args, **kwargs)
